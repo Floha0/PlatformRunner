@@ -6,6 +6,14 @@ using UnityEngine;
 public class Fail : MonoBehaviour
 {
     [SerializeField] private Transform startPoint;
+    
+    private GameManager gameManager;
+    
+    private void Start()
+    {
+        gameManager = FindObjectOfType<GameManager>();
+    }
+    
     private void OnTriggerEnter(Collider other)
     {
         // Check if the object entering the trigger has the Player tag
@@ -27,6 +35,8 @@ public class Fail : MonoBehaviour
                 controller.enabled = true;
 
                 Debug.Log("Player teleported to: " + startPoint.position);
+                
+                gameManager.ChangeScore(-1);
             }
             else
             {
@@ -34,6 +44,8 @@ public class Fail : MonoBehaviour
                 other.transform.position = startPoint.position;
                 other.transform.rotation = startPoint.rotation;
                 Debug.Log("Player teleported to: " + startPoint.position);
+                
+                gameManager.ChangeScore(-1);
             }
         }
     }
