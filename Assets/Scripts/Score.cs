@@ -7,16 +7,19 @@ using TMPro;
 public class GameManager : MonoBehaviour
 {
     [SerializeField] private TMP_Text  scoreText;
-    public int score;
+
+    private DontDestroy dontDestroy;
 
     private void Start()
     {
-        scoreText.text = ("Score: ") + score.ToString();
+        dontDestroy = FindObjectOfType<DontDestroy>();
+        scoreText.text = ("Score: ") + dontDestroy.score.ToString();
+        dontDestroy.score = dontDestroy.score;
     }
 
     public void ChangeScore(int value)
     {
-        score = value + score;
-        scoreText.text = ("Score: ") + score.ToString();
+        dontDestroy.score = value + dontDestroy.score;
+        scoreText.text = ("Score: ") + dontDestroy.score.ToString();
     }
 }
