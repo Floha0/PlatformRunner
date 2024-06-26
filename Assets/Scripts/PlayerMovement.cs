@@ -69,7 +69,6 @@ public class PlayerMovement : MonoBehaviour
         float curSpeedX = canMove ? (isRunning ? runSpeed : walkSpeed) * Input.GetAxis("Vertical") : 0;
         float curSpeedY = canMove ? (isRunning ? runSpeed : walkSpeed) * Input.GetAxis("Horizontal") : 0;
         float movementDirectionY = moveDirection.y;
-        animator.SetBool("isRunning", isRunning);
         
         // Running time management
         if (isRunning)
@@ -126,7 +125,6 @@ public class PlayerMovement : MonoBehaviour
             Vector3 velocity = characterController.velocity;
             float speed = new Vector3(velocity.x, 0, velocity.z).magnitude;
 
-            Debug.Log(speed);
             animator.SetFloat("speed", speed);
         }
     }
