@@ -1,19 +1,12 @@
 using System;
 using System.Collections;
-
 using System.Collections.Generic;
-
 using UnityEngine;
 
-
-
 [RequireComponent(typeof(CharacterController))]
-
 public class PlayerMovement : MonoBehaviour
 {
-    [SerializeField] private Transform playerCameraParent;
-    
-    [SerializeField] private Camera camera;
+    // Movement
     [SerializeField] private float walkSpeed = 4f;
     [SerializeField] private float runSpeed = 8f;
     [SerializeField] private float jumpPower = 4f;
@@ -29,18 +22,24 @@ public class PlayerMovement : MonoBehaviour
     private bool canMove = true;
 
 
+    // Run
     [SerializeField] private float maxRunTime = 5f;
     public float runCooldownTime = 3.0f; // Time the player must wait before running again
     private float runTimeRemaining;
     private float runCooldownRemaining = 0f;
     
-    // Camera Transform Variables
+    // Camera 
+    [SerializeField] private Transform playerCameraParent;
+    [SerializeField] private Camera camera;
     [SerializeField] private float minDistance = 0.5f;
     [SerializeField] private float maxDistance = 4.0f;
     [SerializeField] private float smooth = 20.0f;
     private Vector3 dollyDir;
     private float distance;
 
+    // Animation
+    private Animator animator;
+    private bool grounded = true;
     private void Awake()
     {
         dollyDir = camera.transform.localPosition.normalized;
@@ -49,6 +48,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Start()
     {
+        animator = GetComponentInChildren<Animator>();
         runTimeRemaining = maxRunTime;
         characterController = GetComponent<CharacterController>();
         Cursor.lockState = CursorLockMode.Locked;
@@ -56,7 +56,6 @@ public class PlayerMovement : MonoBehaviour
         rotation.y = transform.eulerAngles.y;
     }
     
-
     void Update()
     {
         CameraCollision();
@@ -70,6 +69,7 @@ public class PlayerMovement : MonoBehaviour
         float curSpeedX = canMove ? (isRunning ? runSpeed : walkSpeed) * Input.GetAxis("Vertical") : 0;
         float curSpeedY = canMove ? (isRunning ? runSpeed : walkSpeed) * Input.GetAxis("Horizontal") : 0;
         float movementDirectionY = moveDirection.y;
+        animator.SetBool("isRunning", isRunning);
         
         // Running time management
         if (isRunning)
@@ -83,7 +83,6 @@ public class PlayerMovement : MonoBehaviour
         
         UpdateRunCooldown();
 
-        Debug.Log(runTimeRemaining);
         
         
         moveDirection = (forward * curSpeedX) + (right * curSpeedY);
@@ -92,6 +91,8 @@ public class PlayerMovement : MonoBehaviour
         if (Input.GetButton("Jump") && canMove && characterController.isGrounded)
         {
             moveDirection.y = jumpPower;
+            animator.SetTrigger("jump");
+            grounded = false;
         }
         else
         {
@@ -103,7 +104,11 @@ public class PlayerMovement : MonoBehaviour
         {
             moveDirection.y -= gravity * Time.deltaTime;
         }
-        
+        else if(grounded)
+        {
+            grounded = false;
+        }
+
         // Move
         characterController.Move(moveDirection * Time.deltaTime);
         
@@ -116,6 +121,13 @@ public class PlayerMovement : MonoBehaviour
             // Rotate the camera
             playerCameraParent.localRotation = Quaternion.Euler(rotation.x, 0, 0);
             transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * sensivity, 0);
+            
+            
+            Vector3 velocity = characterController.velocity;
+            float speed = new Vector3(velocity.x, 0, velocity.z).magnitude;
+
+            Debug.Log(speed);
+            animator.SetFloat("speed", speed);
         }
     }
     
@@ -152,4 +164,5 @@ public class PlayerMovement : MonoBehaviour
         camera.transform.localPosition  = Vector3.Lerp(camera.transform.localPosition , dollyDir * distance, Time.deltaTime * smooth);
         Debug.DrawRay(camera.transform.position, back * 2, Color.red);
     }
+
 }
